@@ -1,0 +1,9 @@
+---
+# tasks file for sample-apache
+- name: Apache Tasks
+  include_tasks: apache.yml
+  when: ansible_system == "Linux"
+
+- name: Firewall Tasks
+  include_tasks: firewall.yml
+  when: ansible_system == "Linux"

@@ -1,0 +1,12 @@
+---
+users:
+  - username: alice
+    uid: 1201
+  - username: vincent
+    uid: 1202
+  - username: sandy
+    uid: 2201
+  - username: patrick
+    uid: 2202
+
+user_password: $6$hvUksCD7Ub62SbCI$n7P8nY/PsFtzbkR.GaeLLEXMtBWPG9v//yhkA7RzC88Ta8K/TNnMp6vMue9Y46TvGZ/jYedJXYa7MJOf3SjwU0

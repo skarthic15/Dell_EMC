@@ -1,0 +1,53 @@
+---
+- hosts: all
+  tasks:
+    - name: get service status
+      service_facts: 
+
+    - name: Verify DB service
+      debug: 
+        msg: "DB service is down....Restarting service"
+      changed_when: ansible_facts.services['mysql.service'].state == 'stopped'
+      when: ansible_facts.services['mysql.service'].state == 'stopped'
+      notify:
+        - Restart DB
+
+    - name: Verify App service
+      debug: 
+        msg: "App service is down....Restarting service"
+      changed_when: ansible_facts.services['ntp.service'].state == 'stopped'
+      when: ansible_facts.services['ntp.service'].state == 'stopped'
+      notify:
+        - Restart App
+
+    - name: Verify Web service
+      debug: 
+        msg: "Web service is down....Restarting service"
+      changed_when: ansible_facts.services['apache2.service'].state == 'stopped'
+      when: ansible_facts.services['apache2.service'].state == 'stopped'
+      notify:
+        - Restart Web
+    
+  handlers:
+    - name: Restart DB 
+      service:
+        name: mysql
+        state: restarted
+        enabled: yes
+      notify:
+        - Restart App
+
+    - name: Restart App
+      service:
+        name: ntp
+        state: restarted
+        enabled: yes
+      notify:
+        - Restart Web
+
+    - name: Restart Web 
+      service:
+        name: apache2
+        state: restarted
+        enabled: yes
+  

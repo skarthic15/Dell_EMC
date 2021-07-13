@@ -1,0 +1,51 @@
+---
+- hosts: all
+  vars_files:
+    - vars/user_list.yml
+    - secret.yml
+
+  tasks:
+    - name: Create group
+      group: 
+        name: wheel 
+        state: present
+
+    - name: Create users on webservers
+      user: 
+        name: "{{item.username}}" 
+        groups: wheel 
+        password: "{{user_password}}"
+        create_home: true 
+        shell: /bin/bash 
+        generate_ssh_key: yes
+      loop: "{{users}}"
+      when: groups['webservers'] is defined and inventory_hostname in groups['webservers'] and (item.uid | string)[0] | int == 1
+      register: user_web
+
+    - name: Deploy SSH Key webservers
+      authorized_key: 
+        user: "{{item.username}}"
+        key: "{{ lookup('file', '/home/{{item.username}}/.ssh/id_rsa.pub') }}" 
+        state: present
+      loop: "{{users}}"
+      when: groups['webservers'] is defined and inventory_hostname in groups['webservers'] and (item.uid | string)[0] | int == 1 and user_web is not skipped
+
+    - name: Create users on database
+      user: 
+        name: "{{item.username}}"
+        groups: wheel
+        password: "{{user_password}}"
+        create_home: true 
+        shell: /bin/bash 
+        generate_ssh_key: yes
+      loop: "{{users}}"
+      when: groups['database'] is defined and inventory_hostname in groups['database'] and (item.uid | string)[0] | int == 2
+      register: user_app
+
+    - name: Deploy SSH Key on appservers
+      authorized_key: 
+        user: "{{item.username}}"
+        key: "{{ lookup('file', '/home/{{item.username}}/.ssh/id_rsa.pub') }}" 
+        state: present
+      loop: "{{users}}"
+      when: groups['database'] is defined and inventory_hostname in groups['database'] and (item.uid | string)[0] | int == 2 and user_app is not skipped

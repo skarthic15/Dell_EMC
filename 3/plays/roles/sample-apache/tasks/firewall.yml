@@ -1,0 +1,22 @@
+- name: Install Firewalld Packages
+  package:
+    name: firewalld
+    state: latest
+  register: inst_pkg
+  when: ansible_system == "Linux"
+
+- name: Start Firewalld
+  service: 
+    name: firewalld
+    state: started
+    enabled: yes
+  register: svc_start
+  when: inst_pkg is defined and inst_pkg is succeeded
+
+- name: Allow 80 and 443 incoming
+  firewalld:
+    permanent: true
+    port: "{{item}}/tcp"
+    state: enabled
+  loop: "{{ports}}"
+  when: svc_start is defined and svc_start is succeeded

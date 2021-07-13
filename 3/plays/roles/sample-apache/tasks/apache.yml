@@ -1,0 +1,19 @@
+- name: Install Packages
+  package:
+    name: "{{item}}"
+    state: latest
+  loop: "{{packages}}"
+  register: inst_pkg
+  when: ansible_system == "Linux"
+
+- name: Configure HTML template
+  template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+  register: html
+  when: inst_pkg is defined and inst_pkg is succeeded
+  notify:
+    - Restart Apache
+
+- name: Flush handlers
+  meta: flush_handlers
